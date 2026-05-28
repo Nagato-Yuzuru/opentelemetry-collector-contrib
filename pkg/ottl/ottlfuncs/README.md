@@ -2389,19 +2389,20 @@ Examples:
 
 The `Substring` Converter returns a substring from the given start index to the specified length.
 
-`target` is a string. `start` and `length` are `int64`. `utf8_safe` is an optional boolean (default: `false`) that enables UTF-8 aware slicing.
+`target` is a string. `start` and `length` are `int64` byte offsets. `utf8_safe` is an optional boolean (default: `true`) that enables UTF-8 aware slicing.
 
-By default, `start` and `length` are byte offsets. Multi-byte UTF-8 characters may be split and the result can be invalid UTF-8.
+This function treats input as valid UTF-8. By default, the slice boundaries are adjusted so that multi-byte characters are never cut in the middle and the result is always valid UTF-8: if `start` falls in the middle of a rune, it is advanced forward to the next rune boundary; if `start + length` falls in the middle of a rune, it is moved backward to the previous rune boundary. The resulting string may therefore be shorter than `length` bytes.
 
-When `utf8_safe` is `true`, `start` and `length` are rune counts and the slice is taken on rune boundaries.
+When `utf8_safe` is `false`, slicing is applied at exact byte offsets. Multi-byte UTF-8 characters may be split and the result can be invalid UTF-8. This mode is faster but should only be used when preserving valid UTF-8 is not required.
 
 If `target` is not a string or is nil, an error is returned.
-If `start`/`length` exceed the length of `target`, an error is returned. When `utf8_safe` is `true`, the comparison is against the rune length.
+If `start`/`length` exceed the byte length of `target`, an error is returned.
 
 Examples:
 
 - `Substring("123456789", 0, 3)`
-- `Substring("一二三", 0, 1, true)`
+- `Substring("一二三", 0, 3)`
+- `Substring("一二三", 0, 4, false)`
 
 ### Time
 
